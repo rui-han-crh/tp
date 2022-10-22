@@ -150,9 +150,75 @@ Classes used by multiple components are in the `seedu.addressbook.commons` packa
 
 --------------------------------------------------------------------------------------------------------------------
 
+## Properties Objects
+
+### Properties of Person Objects
+
+This section explains the components of a person object and how they can be used to track information.
+
+<img src="images/PersonClassDiagram.png" width="450" />
+
+A person object contains editable properties:
+1. Name
+   - Describes the full name of the person
+2. Phone
+   - Records the mobile phone contact number of the person
+3. Email
+   - Records the email address of the person
+4. Address
+   - Records the home address of the person
+5. Tag
+   - Optionally tags the person with a variable number of tags for easy reference within the SectresBook.
+
+And a non-editable property:
+1. Loan
+   - Tracks the current loan amount of the person. A positive number means that the person currently owes money to the club, a negative number means that money is due to be paid to the person.
+
+During instantiation, a person object can be declared with all fields, but during editing, Loan must use a specialised command to transform its data.
+
+## Properties of Note Objects
+
+This section explains the components of a note object and how they can be used to track information.
+
+<img src="images/NoteClassDiagram.png" width="250" />
+
+A note object contains editable properties:
+1. Title
+   - The title of the note, which can be searched by.
+2. Content
+   - The description of the note.
+3. Tags
+   - Optional tags that can be assigned to the notes, after-which every person with that tag will be associated with the notes.
+
+During instantiation, a note object can be declared with any of these properties.
+
+-------------------
+
 ## **Implementation**
 
 This section describes some noteworthy details on how certain features are implemented.
+
+### Edit Feature
+The Edit Person feature is facilitated by the `EditCommand` which utilises the `FindCommand`. It allows users to edit any editable field of a person given the index of the person, or the name of the person.
+
+If given a name that does not correspond to any person in the SectresBook, the edit features performs the same operations as the Find Command.
+
+Given below is an example usage scenario and how the edit mechanism behaves at each step.
+
+Step 1. The user enters the edit command, with either the index or the person's name.
+
+Step 2a If an index is entered, the `EditCommandParser` carries this index to the `EditCommand`, which retrieves the `Person` to edit by getting the `Model`'s current `FilteredList<Person>` and retrieving by index.
+
+Step 2b. If a non-number is entered, the `EditCommandParser` invokes the `FindCommandParser#parse` method and executes it at the same time with `FindCommand#execute`. The `FilteredList<Person>` is then checked to ensure that there is exactly one person that corresponds with the search term. Otherwise, the method short-circuits with ambiguity errors (more than 1 person) or invalid person errors (no persons at all). If successful, `EditCommandParser` returns a new `EditCommand` with a one-based-index of 1. 
+
+Step 3. `EditCommand#execute` is called by the `LogicManager`. The person to edit is retrieved by the index given and a new edited person is created by copying over non-transformed fields and replacing the transformed field.
+
+Step 4. The `editedPerson` is then set to replace the previous state of the `Person` object in the `Model` with `Model#setPerson`.
+
+The following sequence diagram shows how the `edit` feature works.
+
+![Interactions Inside the Logic Component for the `delete 1` Command](images/EditSequenceDiagram.png)
+
 
 ### \[Proposed\] Undo/redo feature
 
